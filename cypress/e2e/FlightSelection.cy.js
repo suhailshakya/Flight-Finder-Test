@@ -1,27 +1,38 @@
 
 describe('Flight selection properties', () => {
-let citiesList;
 let apiKey;
+let parsedCity;
 
     beforeEach(() => {
-        cy.fixture('config').then((data) => {
-            citiesList = data.cities;
-        });
         cy.readAPIKeys();
         cy.validLoginFunc();
     });
 
     it.only('testing cities API', () => {
         cy.wait(2000);
-        cy.getConfigValue('googlePhotoKey').then((value) => {
-            apiKey = value;
+        cy.contains('p', ',').as('city');
+        //retrive element and invoke to use as js object
+        cy.get('@city').invoke('text').then((text) => {
+            let parsedValue = text.split(',');
+            parsedCity = parsedValue[0];
+            if (parsedCity.includes('NSW')){
+                parsedCity = 'Sydney';
+            }
+            if (parsedCity.includes('VIC')){
+                parsedCity = 'Melbourne'
+            }
+            if (parsedCity.includes('44600')){
+                parsedCity = 'Kathmandu'
+            }
+            cy.getConfigValue('googlePhotoKey').then((value) => {
+                apiKey = value;
 
-            citiesList.forEach((ct) => {
+                //API test: Google Photos for list of cities
                 cy.request({
                     method: 'GET',
                     url: `https://maps.googleapis.com/maps/api/place/textsearch/json`,
                     qs: {
-                        query: ct,
+                        query: parsedCity,
                         key: apiKey
                     }
                 }).then((response) => {
