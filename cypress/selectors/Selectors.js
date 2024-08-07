@@ -4,7 +4,7 @@ const selectors = {
         authButton: "button[type='button']"
     },
     flightSelection: {
-        //departureCity:
+        departureCity: "#Toronto"
         //departDate:
         //arriveDate:
     },

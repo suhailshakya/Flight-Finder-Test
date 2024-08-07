@@ -7,31 +7,34 @@ Cypress.Commands.add('validLoginFunc', () => {
     let emailVal;
     let amadeusKey;
     let amadeusSecret;
+    //load the config file from fixture to read data
     cy.fixture('config').then((data) => {
         emailVal = data.email;
         cy.visit('http://localhost:62711');
         lp.getInputField().should('have.value', '');
         lp.getInputField().click();
-        cy.getConfigValue('amadeusAPIKey').then((value) => {
-            amadeusKey = value;
-            cy.getConfigValue('amadeusSecret').then((value2) => {
-                amadeusSecret = value2;
-
-                //API test: Amadeus access token generation
-                cy.request({
-                    method: 'POST',
-                    url: 'https://test.api.amadeus.com/v1/security/oauth2/token',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: {
-                        grant_type: 'client_credentials',
-                        client_id: amadeusKey,
-                        client_secret: amadeusSecret
-                    },
-                    form: true
-                }).then((response) => {
-                    expect(response.body).to.have.property('access_token');
+        cy.readAPIKeys().then(() => {
+            cy.getConfigValue('amadeusAPIKey').then((value) => {
+                amadeusKey = value;
+                cy.getConfigValue('amadeusSecret').then((value2) => {
+                    amadeusSecret = value2;
+    
+                    //API test: Amadeus access token generation
+                    cy.request({
+                        method: 'POST',
+                        url: 'https://test.api.amadeus.com/v1/security/oauth2/token',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: {
+                            grant_type: 'client_credentials',
+                            client_id: amadeusKey,
+                            client_secret: amadeusSecret
+                        },
+                        form: true
+                    }).then((response) => {
+                        expect(response.body).to.have.property('access_token');
+                    });
                 });
             });
         });
